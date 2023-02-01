@@ -25,7 +25,7 @@ fit_model_parser.add_argument('train_target', type=list, location='json',
 @flask_api.route('/fit_model/')
 class FitModel(Resource):
     @flask_api.expect(fit_model_parser)
-    def post(self):
+    def put(self):
         args = fit_model_parser.parse_args(strict=True)
         model_type = args.get('model_type')
         model_name = args.get('model_name')
@@ -102,7 +102,7 @@ remove_model_parser.add_argument('model_names', type=list, location='json',
 @flask_api.route('/remove_model/')
 class RemoveModel(Resource):
     @flask_api.expect(remove_model_parser)
-    def post(self):
+    def delete(self):
         args = remove_model_parser.parse_args(strict=True)
         model_names = args.get('model_names')
 
@@ -154,6 +154,35 @@ class Predict(Resource):
             predict = list(predict)
 
         return jsonify({"predict": predict})
+
+
+show_parser = reqparse.RequestParser()
+show_parser.add_argument('model_name', type=str, location='json',
+                            required=True, help='Name of file with model')
+
+@flask_api.route('/show/')
+class Show(Resource):
+    @flask_api.expect(show_parser)
+    def get(self):
+        args = show_parser.parse_args(strict=True)
+        model_name = args.get('model_name')
+
+        location = '../models/'
+        models = os.listdir(location)
+        models.remove('description.txt')
+
+        if model_name == 'All':
+            return jsonify({"Models": models})
+
+        if f'{model_name}.pkl' not in models:
+            raise NameError(f"You must point off existing 'model_name'")
+
+        filename = f'{location}{model_name}.pkl'
+        model = pickle.load(open(filename, 'rb'))
+
+        model_params = model.get_params()
+
+        return jsonify({model_name: model_params})
 
 
 if __name__ == '__main__':
