@@ -1,6 +1,7 @@
 import os
 import pickle
 
+
 def get_model(model_type: str, params: dict):
     if model_type == 'LogisticRegression':
         from sklearn.linear_model import LogisticRegression
@@ -9,7 +10,9 @@ def get_model(model_type: str, params: dict):
         from lightgbm import LGBMClassifier
         return LGBMClassifier(**params)
     else:
-        raise ValueError('You can work only with LogisticRegression and LightGBM')
+        raise ValueError('You can work only with '
+                         'LogisticRegression and LightGBM')
+
 
 def fit_model(model_type: str,
               model_name: str,
@@ -17,7 +20,8 @@ def fit_model(model_type: str,
               train_data: list,
               train_target: list) -> None:
     if len(train_data) != len(train_target):
-        raise ValueError(f"'train_data' and 'train_target' must have the same dimension")
+        raise ValueError("'train_data' and 'train_target' "
+                         "must have the same dimension")
 
     if params is None:
         params = {}
@@ -48,13 +52,14 @@ def refit_model(model_name: str,
                 train_data: list,
                 train_target: list) -> None:
     if len(train_data) != len(train_target):
-        raise ValueError(f"'train_data' and 'train_target' must have the same dimension")
+        raise ValueError("'train_data' and 'train_target' "
+                         "must have the same dimension")
 
     location = '../models/'
     models = os.listdir(location)
 
     if f'{model_name}.pkl' not in models:
-        raise NameError(f"You must point off existing 'model_name'")
+        raise NameError("You must point off existing 'model_name'")
 
     filename = f'{location}{model_name}.pkl'
     model = pickle.load(open(filename, 'rb'))
@@ -65,17 +70,19 @@ def refit_model(model_name: str,
 
     pickle.dump(model, open(f'../models/{model_name}.pkl', 'wb'))
 
+
 def remove_model(model_names: list) -> None:
     location = '../models/'
     models = os.listdir(location)
 
     for model_name in model_names:
         if f'{model_name}.pkl' not in models:
-            raise NameError(f"You must point off existing 'model_name'")
+            raise NameError("You must point off existing 'model_name'")
 
         file = f"{model_name}.pkl"
         path = os.path.join(location, file)
         os.remove(path)
+
 
 def predict(model_name: str,
             data: list,
@@ -84,7 +91,7 @@ def predict(model_name: str,
     models = os.listdir(location)
 
     if f'{model_name}.pkl' not in models:
-        raise NameError(f"You must point off existing 'model_name'")
+        raise NameError("You must point off existing 'model_name'")
 
     filename = f'{location}{model_name}.pkl'
     model = pickle.load(open(filename, 'rb'))
@@ -98,6 +105,7 @@ def predict(model_name: str,
 
     return pred
 
+
 def show(model_name: str) -> dict:
     location = '../models/'
     models = os.listdir(location)
@@ -107,7 +115,7 @@ def show(model_name: str) -> dict:
         return {"Models": models}
 
     if f'{model_name}.pkl' not in models:
-        raise NameError(f"You must point off existing 'model_name'")
+        raise NameError("You must point off existing 'model_name'")
 
     filename = f'{location}{model_name}.pkl'
     model = pickle.load(open(filename, 'rb'))

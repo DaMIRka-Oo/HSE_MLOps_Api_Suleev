@@ -6,23 +6,31 @@ from base import (
     show
 )
 
+
 from flask import Flask, jsonify
 from flask_restx import Resource, Api, reqparse
+
 
 flask_app = Flask(__name__)
 flask_api = Api(flask_app)
 
 fit_model_parser = reqparse.RequestParser()
-fit_model_parser.add_argument('model_type', type=str, location='json',
-                              required=True, help='LogisticRegression or LightGBM')
-fit_model_parser.add_argument('model_name', type=str, location='json',
-                              required=False, help='Name of file with model')
-fit_model_parser.add_argument('hyperparams', type=dict, location='json',
-                              required=False, help='Model hyperparameters')
-fit_model_parser.add_argument('train_data', type=list, location='json',
-                              required=True, help='Training data')
-fit_model_parser.add_argument('train_target', type=list, location='json',
-                              required=True, help='Training target')
+fit_model_parser.add_argument('model_type', type=str,
+                              location='json', required=True,
+                              help='LogisticRegression or LightGBM')
+fit_model_parser.add_argument('model_name', type=str,
+                              location='json', required=False,
+                              help='Name of file with model')
+fit_model_parser.add_argument('hyperparams', type=dict,
+                              location='json', required=False,
+                              help='Model hyperparameters')
+fit_model_parser.add_argument('train_data', type=list,
+                              location='json', required=True,
+                              help='Training data')
+fit_model_parser.add_argument('train_target', type=list,
+                              location='json', required=True,
+                              help='Training target')
+
 
 @flask_api.route('/fit_model/')
 class FitModel(Resource):
@@ -44,13 +52,14 @@ class FitModel(Resource):
 
 refit_model_parser = reqparse.RequestParser()
 refit_model_parser.add_argument('model_name', type=str, location='json',
-                              required=True, help='Name of file with model')
+                                required=True, help='Name of file with model')
 refit_model_parser.add_argument('hyperparams', type=dict, location='json',
-                              required=False, help='Model hyperparameters')
+                                required=False, help='Model hyperparameters')
 refit_model_parser.add_argument('train_data', type=list, location='json',
-                              required=True, help='Training data')
+                                required=True, help='Training data')
 refit_model_parser.add_argument('train_target', type=list, location='json',
-                              required=True, help='Training target')
+                                required=True, help='Training target')
+
 
 @flask_api.route('/refit_model/')
 class RefitModel(Resource):
@@ -63,14 +72,17 @@ class RefitModel(Resource):
         train_target = args.get('train_target')
 
         refit_model(model_name, params,
-                  train_data, train_target)
+                    train_data, train_target)
 
         response = get_common_response({}, HttpStatus.CREATED)
         return response
 
+
 remove_model_parser = reqparse.RequestParser()
-remove_model_parser.add_argument('model_names', type=list, location='json',
-                                required=True, help='Names of files with model')
+remove_model_parser.add_argument('model_names', type=list,
+                                 location='json', required=True,
+                                 help='Names of files with model')
+
 
 @flask_api.route('/remove_model/')
 class RemoveModel(Resource):
@@ -87,11 +99,12 @@ class RemoveModel(Resource):
 
 predict_parser = reqparse.RequestParser()
 predict_parser.add_argument('model_name', type=str, location='json',
-                                  required=True, help='Name of file with model')
+                            required=True, help='Name of file with model')
 predict_parser.add_argument('data', type=list, location='json',
-                                  required=True, help='Data')
+                            required=True, help='Data')
 predict_parser.add_argument('cutoff', type=float, location='json',
-                                  required=False, help='Cut-off for predict')
+                            required=False, help='Cut-off for predict')
+
 
 @flask_api.route('/predict/')
 class Predict(Resource):
@@ -110,7 +123,8 @@ class Predict(Resource):
 
 show_parser = reqparse.RequestParser()
 show_parser.add_argument('model_name', type=str, location='json',
-                            required=True, help='Name of file with model')
+                         required=True, help='Name of file with model')
+
 
 @flask_api.route('/show/')
 class Show(Resource):
@@ -123,6 +137,7 @@ class Show(Resource):
 
         response = get_common_response(model_params, HttpStatus.OK)
         return response
+
 
 class HttpStatus:
     OK = 200
@@ -142,6 +157,7 @@ def get_error_response(exception, status_code):
     response.status_code = status_code
     return response
 
+
 def get_common_response(result, status_code):
     construct = {
         'error': [],
@@ -155,6 +171,3 @@ def get_common_response(result, status_code):
 
 if __name__ == '__main__':
     flask_app.run(debug=True, host='0.0.0.0', port=5000)
-
-
-
