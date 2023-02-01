@@ -1,11 +1,13 @@
-from base import get_model
+from base import (
+    fit_model,
+    refit_model,
+    remove_model,
+    predict,
+    show
+)
 
-from flask import Flask, Response, jsonify
+from flask import Flask, jsonify
 from flask_restx import Resource, Api, reqparse
-
-import pandas as pd
-import pickle
-import os
 
 flask_app = Flask(__name__)
 flask_api = Api(flask_app)
@@ -33,30 +35,11 @@ class FitModel(Resource):
         train_data = args.get('train_data')
         train_target = args.get('train_target')
 
-        if params is None:
-            params = {}
-        model = get_model(model_type, params)
+        fit_model(model_type, model_name, params,
+                  train_data, train_target)
 
-        location = '../models/'
-        models = os.listdir(location)
-
-        if f'{model_name}.pkl' in models:
-            raise NameError(f"Model '{model_name}' already exist!")
-
-        if model_name is None:
-            i = 1
-            while True:
-                if f"model{i}.pkl" in models:
-                    i += 1
-                    continue
-                break
-            model_name = f"model{i}"
-
-        model.fit(train_data, train_target)
-
-        pickle.dump(model, open(f'../models/{model_name}.pkl', 'wb'))
-
-        return Response(status=201)
+        response = get_common_response({}, HttpStatus.CREATED)
+        return response
 
 
 refit_model_parser = reqparse.RequestParser()
@@ -79,21 +62,11 @@ class RefitModel(Resource):
         train_data = args.get('train_data')
         train_target = args.get('train_target')
 
-        location = '../models/'
-        models = os.listdir(location)
+        refit_model(model_name, params,
+                  train_data, train_target)
 
-        if f'{model_name}.pkl' not in models:
-            raise NameError(f"You must point off existing 'model_name'")
-
-        filename = f'{location}{model_name}.pkl'
-        model = pickle.load(open(filename, 'rb'))
-
-        model.set_params(**params)
-        model.fit(train_data, train_target)
-
-        pickle.dump(model, open(f'../models/{model_name}.pkl', 'wb'))
-
-        return Response(status=201)
+        response = get_common_response({}, HttpStatus.CREATED)
+        return response
 
 remove_model_parser = reqparse.RequestParser()
 remove_model_parser.add_argument('model_names', type=list, location='json',
@@ -106,18 +79,10 @@ class RemoveModel(Resource):
         args = remove_model_parser.parse_args(strict=True)
         model_names = args.get('model_names')
 
-        location = '../models/'
-        models = os.listdir(location)
+        remove_model(model_names)
 
-        for model_name in model_names:
-            if f'{model_name}.pkl' not in models:
-                raise NameError(f"You must point off existing 'model_name'")
-
-            file = f"{model_name}.pkl"
-            path = os.path.join(location, file)
-            os.remove(path)
-
-        return Response(status=200)
+        response = get_common_response({}, HttpStatus.OK)
+        return response
 
 
 predict_parser = reqparse.RequestParser()
@@ -137,23 +102,10 @@ class Predict(Resource):
         data = args.get('data')
         cutoff = args.get('cutoff')
 
-        location = '../models/'
-        models = os.listdir(location)
+        pred = predict(model_name, data, cutoff)
 
-        if f'{model_name}.pkl' not in models:
-            raise NameError(f"You must point off existing 'model_name'")
-
-        filename = f'{location}{model_name}.pkl'
-        model = pickle.load(open(filename, 'rb'))
-
-        predict = model.predict_proba(data)[:, 1]
-        if cutoff is not None:
-            predict = predict > cutoff
-            predict = list(map(int, predict))
-        else:
-            predict = list(predict)
-
-        return jsonify({"predict": predict})
+        response = get_common_response({"predict": pred}, HttpStatus.OK)
+        return response
 
 
 show_parser = reqparse.RequestParser()
@@ -167,22 +119,38 @@ class Show(Resource):
         args = show_parser.parse_args(strict=True)
         model_name = args.get('model_name')
 
-        location = '../models/'
-        models = os.listdir(location)
-        models.remove('description.txt')
+        model_params = show(model_name)
 
-        if model_name == 'All':
-            return jsonify({"Models": models})
+        response = get_common_response(model_params, HttpStatus.OK)
+        return response
 
-        if f'{model_name}.pkl' not in models:
-            raise NameError(f"You must point off existing 'model_name'")
+class HttpStatus:
+    OK = 200
+    CREATED = 201
+    BAD_REQUEST = 400
+    NOT_FOUND = 404
+    CONFLICT = 409
 
-        filename = f'{location}{model_name}.pkl'
-        model = pickle.load(open(filename, 'rb'))
 
-        model_params = model.get_params()
+def get_error_response(exception, status_code):
+    construct = {
+        'error': exception.__str__(),
+        'success': False,
+        'result': []
+    }
+    response = jsonify(construct)
+    response.status_code = status_code
+    return response
 
-        return jsonify({model_name: model_params})
+def get_common_response(result, status_code):
+    construct = {
+        'error': [],
+        'success': True,
+        'result': result
+    }
+    response = jsonify(construct)
+    response.status_code = status_code
+    return response
 
 
 if __name__ == '__main__':
