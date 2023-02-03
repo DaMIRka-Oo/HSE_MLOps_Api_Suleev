@@ -27,7 +27,7 @@ def fit_model(model_type: str,
         params = {}
     model = get_model(model_type, params)
 
-    location = '../models/'
+    location = 'models/'
     models = os.listdir(location)
 
     if f'{model_name}.pkl' in models:
@@ -44,7 +44,7 @@ def fit_model(model_type: str,
 
     model.fit(train_data, train_target)
 
-    pickle.dump(model, open(f'../models/{model_name}.pkl', 'wb'))
+    pickle.dump(model, open(f'models/{model_name}.pkl', 'wb'))
 
 
 def refit_model(model_name: str,
@@ -55,7 +55,7 @@ def refit_model(model_name: str,
         raise ValueError("'train_data' and 'train_target' "
                          "must have the same dimension")
 
-    location = '../models/'
+    location = 'models/'
     models = os.listdir(location)
 
     if f'{model_name}.pkl' not in models:
@@ -68,11 +68,11 @@ def refit_model(model_name: str,
         model.set_params(**params)
     model.fit(train_data, train_target)
 
-    pickle.dump(model, open(f'../models/{model_name}.pkl', 'wb'))
+    pickle.dump(model, open(f'models/{model_name}.pkl', 'wb'))
 
 
 def remove_model(model_names: list) -> None:
-    location = '../models/'
+    location = 'models/'
     models = os.listdir(location)
 
     for model_name in model_names:
@@ -87,7 +87,7 @@ def remove_model(model_names: list) -> None:
 def predict(model_name: str,
             data: list,
             cutoff: float) -> list:
-    location = '../models/'
+    location = 'models/'
     models = os.listdir(location)
 
     if f'{model_name}.pkl' not in models:
@@ -107,7 +107,7 @@ def predict(model_name: str,
 
 
 def show(model_name: str) -> dict:
-    location = '../models/'
+    location = './models/'
     models = os.listdir(location)
     models.remove('description.txt')
 

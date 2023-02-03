@@ -1,0 +1,27 @@
+version: '3.3'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python /mlops_suleev/api_service/ml_api.py
+    volumes:
+      - .:/mlops_suleev
+    ports:
+      - "5000:5000"
+
+  db:
+    image: postgres:14.3-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ./postgres/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=dsuleev
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=mlops_api
+
+volumes:
+  postgres_data:
