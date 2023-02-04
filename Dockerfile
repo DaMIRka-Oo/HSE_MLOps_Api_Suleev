@@ -14,4 +14,4 @@ RUN apt-get install libgomp1
 
 EXPOSE 5000
 
-CMD python ml_api.py
+ENTRYPOINT ["python", "ml_api.py", "--host=0.0.0.0"]
