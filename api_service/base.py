@@ -1,6 +1,6 @@
 import os
 import pickle
-
+from .database_utils import log_to_db
 
 def get_model(model_type: str, params: dict):
     if model_type == 'LogisticRegression':
@@ -20,8 +20,10 @@ def fit_model(model_type: str,
               train_data: list,
               train_target: list) -> None:
     if len(train_data) != len(train_target):
-        raise ValueError("'train_data' and 'train_target' "
-                         "must have the same dimension")
+        mes = ("'train_data' and 'train_target' "
+              "must have the same dimension")
+        log_to_db('fit_model', 400, mes)
+        raise ValueError(mes)
 
     if params is None:
         params = {}
@@ -31,7 +33,9 @@ def fit_model(model_type: str,
     models = os.listdir(location)
 
     if f'{model_name}.pkl' in models:
-        raise NameError(f"Model '{model_name}' already exist!")
+        mes = (f"Model '{model_name}' already exist!")
+        log_to_db('fit_model', 409, mes)
+        raise NameError(mes)
 
     if model_name is None:
         i = 1
@@ -46,20 +50,26 @@ def fit_model(model_type: str,
 
     pickle.dump(model, open(f'models/{model_name}.pkl', 'wb'))
 
+    log_to_db('fit_model', 201, '')
+
 
 def refit_model(model_name: str,
                 params: dict,
                 train_data: list,
                 train_target: list) -> None:
     if len(train_data) != len(train_target):
-        raise ValueError("'train_data' and 'train_target' "
-                         "must have the same dimension")
+        mes = ("'train_data' and 'train_target' "
+               "must have the same dimension")
+        log_to_db('refit_model', 400, mes)
+        raise ValueError(mes)
 
     location = './models/'
     models = os.listdir(location)
 
     if f'{model_name}.pkl' not in models:
-        raise NameError("You must point off existing 'model_name'")
+        mes = ("You must point off existing 'model_name'")
+        log_to_db('refit_model', 404, mes)
+        raise NameError(mes)
 
     filename = f'{location}{model_name}.pkl'
     model = pickle.load(open(filename, 'rb'))
@@ -70,6 +80,8 @@ def refit_model(model_name: str,
 
     pickle.dump(model, open(f'models/{model_name}.pkl', 'wb'))
 
+    log_to_db('refit_model', 201, '')
+
 
 def remove_model(model_names: list) -> None:
     location = './models/'
@@ -77,11 +89,15 @@ def remove_model(model_names: list) -> None:
 
     for model_name in model_names:
         if f'{model_name}.pkl' not in models:
-            raise NameError("You must point off existing 'model_name'")
+            mes = ("You must point off existing 'model_name'")
+            log_to_db('remove_model', 404, mes)
+            raise NameError(mes)
 
         file = f"{model_name}.pkl"
         path = os.path.join(location, file)
         os.remove(path)
+
+    log_to_db('remove_model', 200, '')
 
 
 def predict(model_name: str,
@@ -91,7 +107,9 @@ def predict(model_name: str,
     models = os.listdir(location)
 
     if f'{model_name}.pkl' not in models:
-        raise NameError("You must point off existing 'model_name'")
+        mes = ("You must point off existing 'model_name'")
+        log_to_db('predict', 404, mes)
+        raise NameError(mes)
 
     filename = f'{location}{model_name}.pkl'
     model = pickle.load(open(filename, 'rb'))
@@ -102,6 +120,8 @@ def predict(model_name: str,
         pred = list(map(int, pred))
     else:
         pred = list(pred)
+
+    log_to_db('predict', 200, '')
 
     return pred
 
@@ -115,10 +135,15 @@ def show(model_name: str) -> dict:
         return {"Models": models}
 
     if f'{model_name}.pkl' not in models:
-        raise NameError("You must point off existing 'model_name'")
+        mes = ("You must point off existing 'model_name'")
+        log_to_db('show', 404, mes)
+        raise NameError(mes)
 
     filename = f'{location}{model_name}.pkl'
     model = pickle.load(open(filename, 'rb'))
 
     model_params = model.get_params()
+
+    log_to_db('predict', 200, '')
+
     return {model_name: model_params}
