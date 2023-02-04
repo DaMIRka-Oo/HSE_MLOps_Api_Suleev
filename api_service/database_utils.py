@@ -22,8 +22,8 @@ class DbUtil:
     def log(self, action_type, code, error_message):
         with self.get_cursor() as c:
             c.execute(
-                f'INSERT INTO action_logs (action_type, action_datetime, code, error_message ) '
-                f'VALUES ({action_type}, CURRENT_TIMESTAMP, {code}, {error_message})'
+                f"INSERT INTO action_logs (action_type, action_datetime, code, error_message) "
+                f"VALUES ('{action_type}', CURRENT_TIMESTAMP, {code}, '{error_message}')"
             )
 
     @contextmanager

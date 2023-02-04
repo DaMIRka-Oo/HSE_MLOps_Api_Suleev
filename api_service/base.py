@@ -1,6 +1,6 @@
 import os
 import pickle
-from .database_utils import log_to_db
+from database_utils import log_to_db
 
 def get_model(model_type: str, params: dict):
     if model_type == 'LogisticRegression':
@@ -144,6 +144,6 @@ def show(model_name: str) -> dict:
 
     model_params = model.get_params()
 
-    log_to_db('predict', 200, '')
+    log_to_db('show', 200, '')
 
     return {model_name: model_params}
