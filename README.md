@@ -81,3 +81,16 @@ psql -U dsuleev mlops_api
 
 SELECT * FROM action_logs;
 ```
+
+## Third_HW
+
+Фикстуры находятся в файле `confest.py`
+
+Для запуска тестов нужно ввести команду 
+```bash
+pytest -s -v unit_tests/*
+```
+
+(Хотел воспользоваться параметризацией для теста функций 
+`fit_model` и `refit_model`, однако набор обязательных 
+параметров там отличается)

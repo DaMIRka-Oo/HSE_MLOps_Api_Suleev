@@ -29,7 +29,7 @@ def fit_model(model_type: str,
         params = {}
     model = get_model(model_type, params)
 
-    location = './models/'
+    location = 'api_service/models/'
     models = os.listdir(location)
 
     if f'{model_name}.pkl' in models:
@@ -63,7 +63,7 @@ def refit_model(model_name: str,
         log_to_db('refit_model', 400, mes)
         raise ValueError(mes)
 
-    location = './models/'
+    location = 'api_service/models/'
     models = os.listdir(location)
 
     if f'{model_name}.pkl' not in models:
@@ -84,7 +84,7 @@ def refit_model(model_name: str,
 
 
 def remove_model(model_names: list) -> None:
-    location = './models/'
+    location = 'api_service/models/'
     models = os.listdir(location)
 
     for model_name in model_names:
@@ -103,7 +103,7 @@ def remove_model(model_names: list) -> None:
 def predict(model_name: str,
             data: list,
             cutoff: float) -> list:
-    location = './models/'
+    location = 'api_service/models/'
     models = os.listdir(location)
 
     if f'{model_name}.pkl' not in models:
@@ -127,7 +127,7 @@ def predict(model_name: str,
 
 
 def show(model_name: str) -> dict:
-    location = './models/'
+    location = 'api_service/models/'
     models = os.listdir(location)
     models.remove('description.txt')
 
