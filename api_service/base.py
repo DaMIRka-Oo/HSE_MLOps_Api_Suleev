@@ -1,6 +1,6 @@
 import os
 import pickle
-from database_utils import log_to_db
+from api_service.database_utils import log_to_db
 
 def get_model(model_type: str, params: dict):
     if model_type == 'LogisticRegression':
